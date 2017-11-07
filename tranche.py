@@ -4,6 +4,15 @@ class Tranche(object):
         self._rate = rate
         self._subordination = subordination
 
+    def irr(self):
+        pass
+
+    def al(self):
+        pass
+
+    def dirr(self):
+        pass
+
     @property
     def notional(self):
         return self._notional
