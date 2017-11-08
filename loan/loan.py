@@ -1,7 +1,7 @@
 """
 
 """
-from q2_2.asset.asset import Asset
+from asset.asset import Asset
 
 __author__ = "Duo Han"
 

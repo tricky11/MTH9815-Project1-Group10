@@ -2,8 +2,6 @@
 Base class for Asset. Contains methods for valuing an asset.
 """
 
-__author__ = "Duo Han"
-
 
 class Asset(object):
     def __init__(self, val):

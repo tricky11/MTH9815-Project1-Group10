@@ -1,7 +1,7 @@
 """
 Abstract base class for Cars.
 """
-from q2_2.asset.asset import Asset
+from asset.asset import Asset
 
 
 class Car(Asset):

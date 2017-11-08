@@ -1,8 +1,8 @@
 """
 Loan on an automobile. Assumed to be fixed rate.
 """
-from q2_2.asset.car.car import Car
-from q2_2.loan.fixedrateloan import FixedRateLoan
+from asset.car.car import Car
+from loan.fixedrateloan import FixedRateLoan
 
 
 class AutoLoan(FixedRateLoan):

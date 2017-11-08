@@ -1,4 +1,4 @@
-from q2_2.asset.car.car import Car
+from asset.car.car import Car
 
 
 class Lexus(Car):
