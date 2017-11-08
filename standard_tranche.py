@@ -34,6 +34,7 @@ class StandardTranche(Tranche):
         self._time += 1
         self._interest_paid = False
         self._principal_paid = False
+        return self._time
 
     def make_principal_payment(self, principal_payment):
         if self._principal_paid:
@@ -66,3 +67,7 @@ class StandardTranche(Tranche):
         self._principal_paid = False
         self._transactions.drop(self._transactions.index, inplace=True)
         self._transactions.loc[0] = [0, 0, 0, 0, 0, self._notional]
+
+    @property
+    def transactions(self):
+        return self._transactions
