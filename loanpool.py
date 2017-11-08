@@ -1,11 +1,31 @@
 """
 Collection of loans and methods to get aggregated values over entire collection.
 """
+import numpy as np
 
 
 class LoanPool(object):
     def __init__(self, loans):
         self._loans = loans
+
+    def check_defaults(self):
+        [loan.check_default(np.random.choice([0, 1], p=[LoanPool.get_default_probability(loan.term)])) for
+         loan in self.loans]
+
+    @staticmethod
+    def get_default_probability(term):
+        if term <= 10:
+            return 0.0005
+        if term <= 59:
+            return 0.001
+        if term <= 120:
+            return 0.002
+        if term <= 180:
+            return 0.004
+        if term <= 210:
+            return 0.002
+        if term <= 360:
+            return 0.001
 
     @property
     def loans(self):

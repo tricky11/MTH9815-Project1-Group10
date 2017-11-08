@@ -3,20 +3,25 @@
 """
 from asset.asset import Asset
 
-__author__ = "Duo Han"
-
 
 class Loan(object):
     def __init__(self, notional, rate, term, asset):
         self._notional = notional
         self._rate = rate
         self._term = term
+        self._defaulted = False
+
         if isinstance(asset, Asset):
             self._asset = asset
         else:
             raise TypeError("asset should be of type Asset. Found : {}".format(type(asset)))
 
-    # 2
+    def check_default(self, random_number):
+        if random_number == 0:
+            self._defaulted = True
+            self._notional = 0
+            return self.asset.currentVal(0)
+
     @property
     def notional(self):
         return self._notional
@@ -61,36 +66,15 @@ class Loan(object):
     def totalInterest(self):
         return self.totalPayment() - self._notional
 
-    # 3
-    # recursive version of interest due
-    def interestDue1(self, period):
-        if period >= self._term: return 0
-        return self.balance1(period - 1) * self.monthlyRate(self._rate)
+    def interestDue(self, period):
+        return self.balance(period - 1) * self.monthlyRate(self._rate)
 
-    # recursive version of principleDue1
-    def principleDue1(self, period):
-        if period >= self._term: return 0
-        return self.monthlyPayment(period) - self.interestDue1(period)
+    def principleDue(self, period):
+        return self.monthlyPayment(period) - self.interestDue(period)
 
-    # recursive version of balance1
-    def balance1(self, period):
-        if period == 0: return self._notional
-        if period >= self._term: return 0
-        return self.balance1(period - 1) - self.principleDue1(period)
-
-    # use the formula provided in the slides
-    def interestDue2(self, period):
-        return self.balance2(period - 1) * self.monthlyRate(self._rate)
-
-    # use the formula provided in the slides
-    def principleDue2(self, period):
-        return self.monthlyPayment(period) - self.interestDue2(period)
-
-    # use the formula for balance provided in the slides
-    def balance2(self, period):
+    def balance(self, period):
         return self.calcBalance(self._notional, self._rate, self._term, period)
 
-    # 4
     @classmethod
     def calcMonthlyPmt(cls, face, rate, term, period):
         return face * Loan.monthlyRate(rate) / (1 - (1 / (1 + Loan.monthlyRate(rate)) ** (term)))
@@ -100,7 +84,6 @@ class Loan(object):
         return face * ((1 + Loan.monthlyRate(rate)) ** term - (1 + Loan.monthlyRate(rate)) ** period) / (
             (1 + Loan.monthlyRate(rate)) ** term - 1)
 
-    # 5
     @staticmethod
     def monthlyRate(annualrate):
         return annualrate / 12
@@ -113,4 +96,4 @@ class Loan(object):
         return 0.6 * self.asset.currentVal(period)
 
     def equity(self, period):
-        return self.asset.currentVal(period) - self.balance2(period)
+        return self.asset.currentVal(period) - self.balance(period)
