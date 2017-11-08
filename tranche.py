@@ -1,8 +1,12 @@
+import uuid
+
+
 class Tranche(object):
     def __init__(self, notional, rate, subordination):
         self._notional = notional
         self._rate = rate
         self._subordination = subordination
+        self._id = uuid.uuid4()
 
     def irr(self):
         pass
@@ -36,3 +40,7 @@ class Tranche(object):
     @subordination.setter
     def subordination(self, subordination):
         self._subordination = subordination
+
+    @property
+    def id(self):
+        return self._id

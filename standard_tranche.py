@@ -54,8 +54,8 @@ class StandardTranche(Tranche):
 
     def notional_balance(self):
         return self._notional \
-               - self._transactions.loc['principal_payment'].sum() \
-               + self._transactions.loc['interest_shortfall'].sum()
+               - self._transactions['principal_payment'].sum() \
+               + self._transactions['interest_shortfall'].sum()
 
     def interest_due(self):
         return self._transactions.loc[self._time - 1]['notional_balance'] * self._rate / 12
