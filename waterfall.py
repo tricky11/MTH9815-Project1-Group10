@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def do_waterfall(loan_pool, structured_securities):
     pass
 
@@ -9,7 +12,7 @@ def simulate_waterfall(loan_pool, structured_securities, nsim):
 
 
 def calculate_yield(a, d):
-    return 0
+    return ((7 / (1 + 0.08 * np.exp(-0.19 * a / 12))) + (0.019 * np.sqrt(a * d * 100 / 12))) / 100
 
 
 def get_new_tranche_rate(old_rate, y, coeff):
@@ -17,7 +20,7 @@ def get_new_tranche_rate(old_rate, y, coeff):
 
 
 def get_diff(nA, nB, prevARate, newARate, prevBRate, newBRate):
-    return 0
+    return (nA * abs(newARate / prevARate - 1) + nB * abs(newBRate / prevBRate - 1)) / (nA + nB)
 
 
 def run_monte(loan_pool, structured_securities, tolerance, nsim):
