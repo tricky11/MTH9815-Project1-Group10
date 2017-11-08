@@ -14,8 +14,9 @@ class StructuredSecurities(object):
         self._mode = Mode.sequential
         self._reserve = 0
 
-    def add_tranche(self, tranche):
+    def add_tranche(self, tranche_class, percent_notional, rate, subordination):
         # TODO(harishchandra): Instead of appending and sorting, insert the new tranche at correct position.
+        tranche = tranche_class(percent_notional * self._notional, rate, subordination)
         self._tranches.append(tranche)
         self._tranches = sorted(self._tranches, key=lambda t: t.subordination)
 

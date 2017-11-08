@@ -1,8 +1,18 @@
 import numpy as np
+import pandas as pd
 
 
 def do_waterfall(loan_pool, structured_securities):
-    pass
+    t = 0
+    while loan_pool.get_active_loan_count(t) > 0:
+        t += 1
+        structured_securities.increase_time_period()
+        amount_received = loan_pool.get_total_payment_due(t)
+        structured_securities.make_payments(amount_received)
+    liabilities_transactions = structured_securities.get_waterfall()
+    [tranche_transactions.to_csv("Liabilities_{}.csv".format(i)) for i, tranche_transactions in
+     enumerate(liabilities_transactions)]
+    return liabilities_transactions
 
 
 def simulate_waterfall(loan_pool, structured_securities, nsim):
