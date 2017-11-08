@@ -1,5 +1,3 @@
-from pandas import DataFrame
-
 from tranche import Tranche
 
 
@@ -11,9 +9,6 @@ class StandardTranche(Tranche):
         self._time = 1
         self._interest_paid = False
         self._principal_paid = False
-        self._transactions = DataFrame(
-            columns=['principal_payment', 'interest_payment', 'interest_shortfall', 'recovery', 'total_payment',
-                     'notional_balance'], dtype=float)
         self._transactions.loc[0] = [0, 0, 0, 0, 0, notional]
         self._principal_payment = 0
         self._interest_payment = 0
@@ -68,6 +63,3 @@ class StandardTranche(Tranche):
         self._transactions.drop(self._transactions.index, inplace=True)
         self._transactions.loc[0] = [0, 0, 0, 0, 0, self._notional]
 
-    @property
-    def transactions(self):
-        return self._transactions
