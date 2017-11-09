@@ -21,7 +21,8 @@ def simulate_waterfall(loan_pool, structured_securities, nsim):
             if not np.isinf(tranche[2]):
                 als[j].append(tranche[2])
             dirrs[j].append(tranche[3])
-    return ((np.mean(als[0]), np.mean(dirrs[0])), (np.mean(als[1]), np.mean(dirrs[1])))
+        print "Inner simulation : {}".format(i)
+    return [(np.mean(tranche_als), np.mean(tranche_dirrs)) for tranche_als, tranche_dirrs in zip(als, dirrs)]
 
 
 def calculate_yield(a, d):
@@ -32,23 +33,24 @@ def get_new_tranche_rate(old_rate, y, coeff):
     return old_rate + coeff * (y - old_rate)
 
 
-def get_diff(nA, nB, prevARate, newARate, prevBRate, newBRate):
-    return (nA * abs(newARate / prevARate - 1) + nB * abs(newBRate / prevBRate - 1)) / (nA + nB)
+def get_diff(notionals, old_rates, new_rates):
+    return sum([notional * abs(new_rate / old_rate - 1) for notional, old_rate, new_rate in
+                zip(notionals, old_rates, new_rates)]) / sum(notionals)
 
 
 def run_monte(loan_pool, structured_securities, tolerance, nsim):
-    old_a_rate = 0.05
-    old_b_rate = 0.08
-    notional_a = 1
-    notional_b = 1
+    notionals = structured_securities.tranche_notionals()
+    old_rates = structured_securities.tranche_rates()
     while True:
-        a, d = simulate_waterfall(loan_pool, structured_securities, nsim)
-        y = calculate_yield(a, d)
-        new_a_rate = get_new_tranche_rate(old_a_rate, y, 1.2)
-        new_b_rate = get_new_tranche_rate(old_b_rate, y, 0.8)
-        if get_diff(notional_a, notional_b, old_a_rate, new_a_rate, old_b_rate, new_b_rate) < tolerance:
+        simulation_results = simulate_waterfall(loan_pool, structured_securities, nsim)
+        yields = [calculate_yield(a, d) for (a, d) in simulation_results]
+        new_a_rate = get_new_tranche_rate(old_rates[0], yields[0], 1.2)
+        new_b_rate = get_new_tranche_rate(old_rates[1], yields[1], 0.8)
+        diff = get_diff(notionals, old_rates, [new_a_rate, new_b_rate])
+        if diff < tolerance:
             break
         else:
-            old_a_rate = new_a_rate
-            old_b_rate = new_b_rate
+            old_rates = [new_a_rate, new_b_rate]
+        print "Outer simulation : diff = {}".format(diff)
+        print "Outer simulation : rates = {}".format(old_rates)
     return new_a_rate, new_b_rate

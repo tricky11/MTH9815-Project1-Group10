@@ -1,8 +1,7 @@
+import waterfall
 from loanpool import LoanPool
 from standard_tranche import StandardTranche
-import waterfall
 from structured_securities import StructuredSecurities
-import waterfall
 
 
 def main():
@@ -12,7 +11,7 @@ def main():
 
     loan_pool = LoanPool.create_from_csv("Loans.csv")
     run_sample(loan_pool, ss)
-    print waterfall.simulate_waterfall(loan_pool, ss, 20)
+    print waterfall.run_monte(loan_pool, ss, 0.1, 20)
 
 
 def run_sample(loan_pool, ss):

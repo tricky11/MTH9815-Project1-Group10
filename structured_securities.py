@@ -67,8 +67,15 @@ class StructuredSecurities(object):
         self._reserve += cash_amount
 
     def get_waterfall(self):
-        return [(tranche.transactions, tranche.irr(), tranche.al(), tranche.dirr(), tranche.rating()) for tranche in self._tranches]
+        return [(tranche.transactions, tranche.irr(), tranche.al(), tranche.dirr(), tranche.rating()) for tranche in
+                self._tranches]
 
     @property
     def reserve(self):
         return self._reserve
+
+    def tranche_rates(self):
+        return [tranche.rate for tranche in self._tranches]
+
+    def tranche_notionals(self):
+        return [tranche.notional for tranche in self._tranches]

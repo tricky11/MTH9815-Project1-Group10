@@ -22,7 +22,8 @@ class Loan(object):
         elif random_number == 0:
             self._defaulted = True
             self._notional = 0
-            return self.asset.currentVal(time)
+            # Assuming 60% recovery of value after depreciation
+            return self.asset.currentVal(time) * 0.6
         else:
             return 0
 

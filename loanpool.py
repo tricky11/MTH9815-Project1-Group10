@@ -15,7 +15,7 @@ class LoanPool(object):
     def check_defaults(self, time):
         return sum(
             [loan.check_default(time, np.random.randint(int(1 / LoanPool.get_default_probability(time)))) for loan in
-             self.loans])
+             self._loans])
 
     @staticmethod
     def get_default_probability(time):
@@ -29,7 +29,7 @@ class LoanPool(object):
             return 0.004
         if time <= 210:
             return 0.002
-        if time <= 360:
+        else:
             return 0.001
 
     @property
