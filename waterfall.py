@@ -1,24 +1,27 @@
 import numpy as np
-import pandas as pd
 
 
 def do_waterfall(loan_pool, structured_securities):
-    t = 0
-    while loan_pool.get_active_loan_count(t) > 0:
-        t += 1
+    time = 0
+    while loan_pool.get_active_loan_count(time) > 0:
+        time += 1
         structured_securities.increase_time_period()
-        amount_received = loan_pool.get_total_payment_due(t)
-        structured_securities.make_payments(amount_received)
-    liabilities_transactions = structured_securities.get_waterfall()
-    [tranche_transactions.to_csv("Liabilities_{}.csv".format(i)) for i, tranche_transactions in
-     enumerate(liabilities_transactions)]
-    return liabilities_transactions
+        recovery_amount = loan_pool.check_defaults(time)
+        payments_received = loan_pool.get_total_payment_due(time)
+        structured_securities.make_payments(payments_received + recovery_amount)
+    return structured_securities.get_waterfall()
 
 
 def simulate_waterfall(loan_pool, structured_securities, nsim):
-    results = [do_waterfall(loan_pool, structured_securities) for i in range(nsim)]
-    sum_results = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), results, (0, 0))
-    return sum_results[0] / nsim, sum_results[1] / nsim
+    als = ([], [])
+    dirrs = ([], [])
+    for i in range(nsim):
+        result = do_waterfall(loan_pool, structured_securities)
+        for j, tranche in enumerate(result):
+            if not np.isinf(tranche[2]):
+                als[j].append(tranche[2])
+            dirrs[j].append(tranche[3])
+    return ((np.mean(als[0]), np.mean(dirrs[0])), (np.mean(als[1]), np.mean(dirrs[1])))
 
 
 def calculate_yield(a, d):
@@ -34,8 +37,8 @@ def get_diff(nA, nB, prevARate, newARate, prevBRate, newBRate):
 
 
 def run_monte(loan_pool, structured_securities, tolerance, nsim):
-    old_a_rate = 0.08
-    old_b_rate = 0.05
+    old_a_rate = 0.05
+    old_b_rate = 0.08
     notional_a = 1
     notional_b = 1
     while True:

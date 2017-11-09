@@ -16,11 +16,15 @@ class Loan(object):
         else:
             raise TypeError("asset should be of type Asset. Found : {}".format(type(asset)))
 
-    def check_default(self, random_number):
-        if random_number == 0:
+    def check_default(self, time, random_number):
+        if self._defaulted:
+            return 0
+        elif random_number == 0:
             self._defaulted = True
             self._notional = 0
-            return self.asset.currentVal(0)
+            return self.asset.currentVal(time)
+        else:
+            return 0
 
     @property
     def notional(self):
@@ -57,6 +61,10 @@ class Loan(object):
     def asset(self, asset):
         self._asset = asset
 
+    @property
+    def defaulted(self):
+        return self._defaulted
+
     def monthlyPayment(self, period):
         return self.calcMonthlyPmt(self._notional, self.getRate(period), self._term, period)
 
@@ -73,7 +81,7 @@ class Loan(object):
         return self.monthlyPayment(period) - self.interestDue(period)
 
     def balance(self, period):
-        return self.calcBalance(self._notional, self._rate, self._term, period)
+        return self.calcBalance(self._notional, self._rate, self._term, period) if not self._defaulted else 0
 
     @classmethod
     def calcMonthlyPmt(cls, face, rate, term, period):

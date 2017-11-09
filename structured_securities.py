@@ -27,7 +27,7 @@ class StructuredSecurities(object):
             raise TypeError("'mode' has to be one of Mode.sequential or Mode.pro_rata. Found: " + str(type(mode)))
 
     def increase_time_period(self):
-        [tranche.increase_time_period() for tranche in self._tranches]
+        [tranche.increase_time_period() for tranche in self._tranches if tranche.notional_balance() > 0]
 
     def make_payments(self, cash_amount):
         # Use the reserve amount from previous iteration.
@@ -67,7 +67,7 @@ class StructuredSecurities(object):
         self._reserve += cash_amount
 
     def get_waterfall(self):
-        return [tranche.transactions for tranche in self._tranches]
+        return [(tranche.transactions, tranche.irr(), tranche.al(), tranche.dirr(), tranche.rating()) for tranche in self._tranches]
 
     @property
     def reserve(self):

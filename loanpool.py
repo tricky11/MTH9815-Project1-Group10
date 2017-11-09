@@ -12,23 +12,24 @@ class LoanPool(object):
     def __init__(self, loans):
         self._loans = loans
 
-    def check_defaults(self):
-        [loan.check_default(np.random.choice([0, 1], p=[LoanPool.get_default_probability(loan.term)])) for
-         loan in self.loans]
+    def check_defaults(self, time):
+        return sum(
+            [loan.check_default(time, np.random.randint(int(1 / LoanPool.get_default_probability(time)))) for loan in
+             self.loans])
 
     @staticmethod
-    def get_default_probability(term):
-        if term <= 10:
+    def get_default_probability(time):
+        if time <= 10:
             return 0.0005
-        if term <= 59:
+        if time <= 59:
             return 0.001
-        if term <= 120:
+        if time <= 120:
             return 0.002
-        if term <= 180:
+        if time <= 180:
             return 0.004
-        if term <= 210:
+        if time <= 210:
             return 0.002
-        if term <= 360:
+        if time <= 360:
             return 0.001
 
     @property
@@ -55,7 +56,7 @@ class LoanPool(object):
         return sum([loan.interest(period) for loan in self._loans])
 
     def get_total_payment_due(self, period):
-        return sum([loan.monthlyPayment(period) for loan in self._loans])
+        return sum([loan.monthlyPayment(period) for loan in self._loans if not loan.defaulted])
 
     def get_active_loan_count(self, period):
         return sum([loan.balance(period) > 0 for loan in self._loans])
