@@ -26,7 +26,7 @@ def simulate_waterfall(loan_pool, structured_securities, nsim):
 
 
 def calculate_yield(a, d):
-    return ((7 / (1 + 0.08 * np.exp(-0.19 * a / 12))) + (0.019 * np.sqrt(a * d * 100 / 12))) / 100
+    return ((7 / (1 + 0.08 * np.exp(-0.19 * a / 12))) + (0.019 * np.sqrt(a * abs(d) * 100 / 12))) / 100
 
 
 def get_new_tranche_rate(old_rate, y, coeff):
