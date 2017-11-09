@@ -79,3 +79,7 @@ class StructuredSecurities(object):
 
     def tranche_notionals(self):
         return [tranche.notional for tranche in self._tranches]
+
+    def reset(self):
+        [tranche.reset() for tranche in self._tranches]
+        self._reserve = 0

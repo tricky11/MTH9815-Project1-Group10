@@ -3,6 +3,8 @@ import numpy as np
 
 def do_waterfall(loan_pool, structured_securities):
     time = 0
+    structured_securities.reset()
+    loan_pool.reset()
     while loan_pool.get_active_loan_count(time) > 0:
         time += 1
         structured_securities.increase_time_period()

@@ -67,6 +67,9 @@ class LoanPool(object):
     def get_weighted_average_rate(self):
         return sum([loan.notional * loan.rate for loan in self._loans]) / self.get_total_principal()
 
+    def reset(self):
+        [loan.reset() for loan in self._loans]
+
     @staticmethod
     def create_from_csv(filename):
         df = pd.read_csv(filename, index_col=["Loan #"])

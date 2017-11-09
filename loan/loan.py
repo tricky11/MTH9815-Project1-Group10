@@ -21,9 +21,7 @@ class Loan(object):
             return 0
         elif random_number == 0:
             self._defaulted = True
-            self._notional = 0
-            # Assuming 60% recovery of value after depreciation
-            return self.asset.currentVal(time) * 0.6
+            return self.recoveryValue(time)
         else:
             return 0
 
@@ -65,6 +63,9 @@ class Loan(object):
     @property
     def defaulted(self):
         return self._defaulted
+
+    def reset(self):
+        self._defaulted = False
 
     def monthlyPayment(self, period):
         return self.calcMonthlyPmt(self._notional, self.getRate(period), self._term, period)
