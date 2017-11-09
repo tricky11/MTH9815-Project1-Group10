@@ -5,7 +5,7 @@ from structured_securities import StructuredSecurities
 
 
 def main():
-    ss = StructuredSecurities(200000)
+    ss = StructuredSecurities(20000000)
     ss.add_tranche(StandardTranche, 0.5, 0.05, 1)
     ss.add_tranche(StandardTranche, 0.5, 0.08, 2)
     waterfall.do_waterfall(LoanPool.create_from_csv("Loans.csv"), ss)

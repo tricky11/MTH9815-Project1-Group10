@@ -38,8 +38,9 @@ class StructuredSecurities(object):
         # TODO: convert these to reduce operations
         for tranche in self._tranches:
             available_interest_amount = min(cash_amount, tranche.interest_due())
-            tranche.make_interest_payment(available_interest_amount)
-            cash_amount -= available_interest_amount
+            if available_interest_amount > 0:
+                tranche.make_interest_payment(available_interest_amount)
+                cash_amount -= available_interest_amount
 
         # Make principal payments according to mode.
         if self._mode == Mode.pro_rata:
@@ -48,14 +49,16 @@ class StructuredSecurities(object):
             # TODO: convert these to reduce operations
             for i, tranche in enumerate(self._tranches):
                 available_principal_amount = min(principals_due[i], tranche.notional_balance())
-                tranche.make_principal_payment(available_principal_amount)
-                cash_amount -= available_principal_amount
+                if available_principal_amount > 0:
+                    tranche.make_principal_payment(available_principal_amount)
+                    cash_amount -= available_principal_amount
         elif self._mode == Mode.sequential:
             # TODO: convert these to reduce operations
             for tranche in self._tranches:
                 available_principal_amount = min(cash_amount, tranche.notional_balance())
-                tranche.make_principal_payment(available_principal_amount)
-                cash_amount -= available_principal_amount
+                if available_principal_amount > 0:
+                    tranche.make_principal_payment(available_principal_amount)
+                    cash_amount -= available_principal_amount
         else:
             # This should never occur since we check for valid mode while setting it.
             raise TypeError("Unknown mode: " + str(self._mode))
@@ -65,3 +68,7 @@ class StructuredSecurities(object):
 
     def get_waterfall(self):
         return [tranche.transactions for tranche in self._tranches]
+
+    @property
+    def reserve(self):
+        return self._reserve

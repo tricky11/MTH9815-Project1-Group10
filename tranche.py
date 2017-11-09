@@ -1,5 +1,3 @@
-import uuid
-
 import numpy as np
 from pandas import DataFrame
 
@@ -9,13 +7,12 @@ class Tranche(object):
         self._notional = notional
         self._rate = rate
         self._subordination = subordination
-        self._id = uuid.uuid4()
         self._transactions = DataFrame(
-            columns=['principal_payment', 'interest_payment', 'interest_shortfall', 'recovery', 'total_payment',
+            columns=['principal_payment', 'interest_payment', 'interest_shortfall', 'total_payment',
                      'notional_balance'], dtype=float)
 
     def irr(self):
-        return np.irr([-self.notional, self._transactions['notional_balance'][1:]])
+        return np.irr([-self.notional, self._transactions['notional_balance'][1:]]) * 12
 
     def al(self):
         return (sum([x * y for x, y in zip(self._transactions['notional_balance'][1:],
@@ -47,10 +44,6 @@ class Tranche(object):
     @subordination.setter
     def subordination(self, subordination):
         self._subordination = subordination
-
-    @property
-    def id(self):
-        return self._id
 
     @property
     def transactions(self):
