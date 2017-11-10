@@ -1,6 +1,10 @@
 import numpy as np
 from pandas import DataFrame
 
+"""
+Base class for a tranche in a Structured Security. 
+Contains methods for calculating waterfall metrics.
+"""
 
 class Tranche(object):
     def __init__(self, notional, rate, subordination):

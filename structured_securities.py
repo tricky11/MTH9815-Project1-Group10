@@ -1,7 +1,17 @@
 from enum import Enum
 
+"""
+Represents a Structured Security and holds all its tranches. 
+Contains methods for adding new tranches and making payments.
+
+Call reset when re-using this class after making any payments.
+"""
+
 
 class Mode(Enum):
+    """
+    Enum for setting the mode of principal payments for a Structured Security.
+    """
     sequential = 1
     pro_rata = 2
 
@@ -30,6 +40,15 @@ class StructuredSecurities(object):
         [tranche.increase_time_period() for tranche in self._tranches if tranche.notional_balance() > 0]
 
     def make_payments(self, cash_amount):
+        """
+        Combine the reserve cash from previous periods to the new amount available this period.
+        Make interest payments to all tranches.
+        Make principal payments to all tranches as per the mode set on this security.
+        Add remaining cash to reserve account.
+
+        :param cash_amount: The new amount available to make payments this period.
+        :return: None
+        """
         # Use the reserve amount from previous iteration.
         cash_amount += self._reserve
         self._reserve = 0
@@ -79,5 +98,10 @@ class StructuredSecurities(object):
         return self._tranches
 
     def reset(self):
+        """
+        Reset all tranches and set reserve cash to 0.
+        
+        :return: None
+        """
         [tranche.reset() for tranche in self._tranches]
         self._reserve = 0
