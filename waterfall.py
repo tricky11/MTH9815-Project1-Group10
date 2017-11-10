@@ -3,7 +3,52 @@ import multiprocessing
 import numpy as np
 
 
+def run_monte(loan_pool, structured_securities, tolerance, nsim):
+    """
+    Calculate yield from average DIRR and WAL.
+
+    Args:
+        loan_pool: The assets for this security.
+        structured_securities: The description of tranches in this security.
+        tolerance: The minimum update required in rates with each iteration before we stop.
+        nsim: Number of simulations to run with each set of rates.
+
+    Returns:
+        (float, float): A tuple with fair coupon rates for each tranche.
+    """
+
+    notionals = [tranche.notional for tranche in structured_securities.tranches]
+    old_rates = [tranche.rate for tranche in structured_securities.tranches]
+    while True:
+        simulation_results = run_simulation_parallel(loan_pool, structured_securities, nsim, 20)
+        yields = [calculate_yield(a, d) for (a, d) in simulation_results]
+        new_a_rate = get_new_tranche_rate(old_rates[0], yields[0], 1.2)
+        new_b_rate = get_new_tranche_rate(old_rates[1], yields[1], 0.8)
+        diff = get_diff(notionals, old_rates, [new_a_rate, new_b_rate])
+        if diff < tolerance:
+            break
+        else:
+            old_rates = [new_a_rate, new_b_rate]
+            # Update rates.
+            for tranche, new_rate in zip(structured_securities.tranches, old_rates):
+                tranche.rate = new_rate
+        print "Outer simulation : diff = {}".format(diff)
+        print "Outer simulation : rates = {}".format(old_rates)
+    return new_a_rate, new_b_rate
+
+
 def do_waterfall(loan_pool, structured_securities):
+    """
+    Calculate yield from average DIRR and WAL.
+
+    Args:
+        loan_pool: The assets for this security.
+        structured_securities: The description of tranches in this security.
+
+    Returns:
+        (tuple, float, float, float): A tuple with transactions, internal rate of return, average life and
+        reduction in yield for each tranche.
+    """
     time = 0
     structured_securities.reset()
     loan_pool.reset()
@@ -17,6 +62,18 @@ def do_waterfall(loan_pool, structured_securities):
 
 
 def simulate_waterfall(loan_pool, structured_securities, nsim):
+    """
+        Run nsim number of simulations sequentially and return the average of results.
+
+        Args:
+            loan_pool: The assets for this security.
+            structured_securities: The description of tranches in this security.
+            nsim: The number of simulations to run before averaging results.
+
+        Returns:
+            (float, float): A tuple with WAL & average DIRR for each tranche.
+
+    """
     als = ([], [])
     dirrs = ([], [])
     for i in range(nsim):
@@ -25,11 +82,25 @@ def simulate_waterfall(loan_pool, structured_securities, nsim):
             if not np.isinf(tranche[2]):
                 als[j].append(tranche[2])
             dirrs[j].append(tranche[3])
-        print "Inner simulation : {}".format(i)
+        print "Inner simulation: {}".format(i)
     return [(np.mean(tranche_als), np.mean(tranche_dirrs)) for tranche_als, tranche_dirrs in zip(als, dirrs)]
 
 
 def run_simulation_parallel(loan_pool, structured_securities, nsim, num_processes):
+    """
+        Runs nsim number of simulations with the given assets and tranches
+        using num_processes number of processes in parallel.
+        Averages results in each process first, then averages across processes.
+
+        Args:
+            loan_pool: The assets for this security.
+            structured_securities: The description of tranches in this security.
+            nsim: The number of simulations to run before averaging results.
+            num_processes: The number of processes to start in parallel.
+
+        Returns:
+            (float, float): A tuple with WAL & average DIRR for each tranche.
+    """
     input_queue = multiprocessing.Queue()
     output_queue = multiprocessing.Queue()
 
@@ -53,6 +124,9 @@ def run_simulation_parallel(loan_pool, structured_securities, nsim, num_processe
 
 
 def doWork(input, output):
+    """
+    Loop through input queue, apply the function and push results in output queue.
+    """
     while True:
         try:
             f, args = input.get(timeout=1)
@@ -64,6 +138,16 @@ def doWork(input, output):
 
 
 def calculate_yield(a, d):
+    """
+    Calculate yield from average DIRR and WAL.
+
+    Args:
+        a: The WAL for a tranche.
+        d: Average DIRR for a tranche.
+
+    Returns:
+        float: yield
+    """
     return ((7 / (1 + 0.08 * np.exp(-0.19 * a / 12))) + (0.019 * np.sqrt(a * abs(d) * 100 / 12))) / 100
 
 
@@ -72,26 +156,8 @@ def get_new_tranche_rate(old_rate, y, coeff):
 
 
 def get_diff(notionals, old_rates, new_rates):
+    """
+    Calculate weighted absolute difference between new_rates and old_rates, weighting each tranche by its notional.
+    """
     return sum([notional * abs(new_rate / old_rate - 1) for notional, old_rate, new_rate in
                 zip(notionals, old_rates, new_rates)]) / sum(notionals)
-
-
-def run_monte(loan_pool, structured_securities, tolerance, nsim):
-    notionals = [tranche.notional for tranche in structured_securities.tranches]
-    old_rates = [tranche.rate for tranche in structured_securities.tranches]
-    while True:
-        simulation_results = run_simulation_parallel(loan_pool, structured_securities, nsim, 20)
-        yields = [calculate_yield(a, d) for (a, d) in simulation_results]
-        new_a_rate = get_new_tranche_rate(old_rates[0], yields[0], 1.2)
-        new_b_rate = get_new_tranche_rate(old_rates[1], yields[1], 0.8)
-        diff = get_diff(notionals, old_rates, [new_a_rate, new_b_rate])
-        if diff < tolerance:
-            break
-        else:
-            old_rates = [new_a_rate, new_b_rate]
-            # Update rates.
-            for tranche, new_rate in zip(structured_securities.tranches, old_rates):
-                tranche.rate = new_rate
-        print "Outer simulation : diff = {}".format(diff)
-        print "Outer simulation : rates = {}".format(old_rates)
-    return new_a_rate, new_b_rate
