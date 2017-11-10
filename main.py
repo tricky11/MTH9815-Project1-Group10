@@ -10,13 +10,21 @@ def main():
     ss.add_tranche(StandardTranche, 0.5, 0.08, 2)
 
     loan_pool = LoanPool.create_from_csv("Loans.csv")
+
+    # Suggested simulation in the Project
+    # fair_coupon_rates = waterfall.run_monte(loan_pool, ss, 0.005, 2000)
+
+    # Faster simulation just for verifying if the program runs properly
     fair_coupon_rates = waterfall.run_monte(loan_pool, ss, 0.1, 20)
+
     print "Fair coupon rates for tranches are: {}".format(fair_coupon_rates)
+
+    # Run the waterfall with fair coupon rates and save waterfall to csv.
     fair_ss = StructuredSecurities(20000000)
     fair_ss.add_tranche(StandardTranche, 0.5, fair_coupon_rates[0], 1)
     fair_ss.add_tranche(StandardTranche, 0.5, fair_coupon_rates[1], 2)
-    print "Amount left in reserve account : {}".format(ss.reserve)
     run_single_waterfall(loan_pool, fair_ss)
+    print "Amount left in reserve account : {}".format(fair_ss.reserve)
 
 
 def run_single_waterfall(loan_pool, ss):
