@@ -74,11 +74,9 @@ class StructuredSecurities(object):
     def reserve(self):
         return self._reserve
 
-    def tranche_rates(self):
-        return [tranche.rate for tranche in self._tranches]
-
-    def tranche_notionals(self):
-        return [tranche.notional for tranche in self._tranches]
+    @property
+    def tranches(self):
+        return self._tranches
 
     def reset(self):
         [tranche.reset() for tranche in self._tranches]

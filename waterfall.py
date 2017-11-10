@@ -77,8 +77,8 @@ def get_diff(notionals, old_rates, new_rates):
 
 
 def run_monte(loan_pool, structured_securities, tolerance, nsim):
-    notionals = structured_securities.tranche_notionals()
-    old_rates = structured_securities.tranche_rates()
+    notionals = [tranche.notional for tranche in structured_securities.tranches]
+    old_rates = [tranche.rate for tranche in structured_securities.tranches]
     while True:
         simulation_results = run_simulation_parallel(loan_pool, structured_securities, nsim, 20)
         yields = [calculate_yield(a, d) for (a, d) in simulation_results]
@@ -89,6 +89,9 @@ def run_monte(loan_pool, structured_securities, tolerance, nsim):
             break
         else:
             old_rates = [new_a_rate, new_b_rate]
+            # Update rates.
+            for tranche, new_rate in zip(structured_securities.tranches, old_rates):
+                tranche.rate = new_rate
         print "Outer simulation : diff = {}".format(diff)
         print "Outer simulation : rates = {}".format(old_rates)
     return new_a_rate, new_b_rate
