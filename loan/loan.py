@@ -1,5 +1,5 @@
 """
-
+Base class for a Loan. Contains methods for calculating payments, defaults & recovery.
 """
 from asset.asset import Asset
 

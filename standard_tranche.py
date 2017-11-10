@@ -86,7 +86,7 @@ class StandardTranche(Tranche):
     def reset(self):
         """
         Reset time and all flags. Remove all entries from transaction DataFrame.
-        
+
         :return: None
         """
         self._time = 0

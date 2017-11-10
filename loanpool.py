@@ -13,12 +13,22 @@ class LoanPool(object):
         self._loans = loans
 
     def check_defaults(self, time):
+        """
+        Check if each loan is defaulted and return the total recovered amount in this time period.
+
+        :param time: The current time period.
+        :return: float: The recovered amount from all the defaulted loans.
+        """
         return sum(
             [loan.check_default(time, np.random.randint(int(1 / LoanPool.get_default_probability(time)))) for loan in
              self._loans])
 
     @staticmethod
     def get_default_probability(time):
+        """
+        :param time: The current time period.
+        :return: float: The probability of default in this time period.
+        """
         if time <= 10:
             return 0.0005
         if time <= 59:
