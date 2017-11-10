@@ -100,7 +100,7 @@ class StructuredSecurities(object):
     def reset(self):
         """
         Reset all tranches and set reserve cash to 0.
-        
+
         :return: None
         """
         [tranche.reset() for tranche in self._tranches]
